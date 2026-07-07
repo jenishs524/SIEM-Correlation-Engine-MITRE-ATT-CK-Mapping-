@@ -1,0 +1,44 @@
+rules:
+  - id: RULE_001
+    name: "Brute Force Attack"
+    description: "Multiple failed logins from same source in short time"
+    condition:
+      event_type: "failed_login"
+      source_ip: "$src_ip"
+      count: 5
+      time_window: 60
+    mitre_technique: "T1110"
+    severity: "HIGH"
+    action: "alert"
+
+  - id: RULE_002
+    name: "Account Discovery"
+    description: "Multiple successful account enumeration attempts"
+    condition:
+      event_type: "account_enumeration"
+      count: 3
+      time_window: 30
+    mitre_technique: "T1087"
+    severity: "MEDIUM"
+    action: "alert"
+
+  - id: RULE_003
+    name: "Suspicious Command Execution"
+    description: "Execution of suspicious command (e.g., powershell -e)"
+    condition:
+      event_type: "command_execution"
+      command_pattern: "powershell.*-e"
+    mitre_technique: "T1059"
+    severity: "HIGH"
+    action: "alert"
+
+  - id: RULE_004
+    name: "Reconnaissance via DNS"
+    description: "High volume of DNS queries to suspicious domains"
+    condition:
+      event_type: "dns_query"
+      count: 10
+      time_window: 10
+    mitre_technique: "T1568"
+    severity: "MEDIUM"
+    action: "alert"

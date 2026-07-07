@@ -1,0 +1,32 @@
+{
+  "T1110": {
+    "name": "Brute Force",
+    "tactic": "Credential Access",
+    "description": "Adversaries may use brute force techniques to gain access to accounts."
+  },
+  "T1087": {
+    "name": "Account Discovery",
+    "tactic": "Discovery",
+    "description": "Adversaries may attempt to get a listing of accounts on a system."
+  },
+  "T1078": {
+    "name": "Valid Accounts",
+    "tactic": "Defense Evasion, Persistence, Privilege Escalation, Initial Access",
+    "description": "Adversaries may obtain and abuse credentials of existing accounts."
+  },
+  "T1059": {
+    "name": "Command and Scripting Interpreter",
+    "tactic": "Execution",
+    "description": "Adversaries may abuse command and script interpreters to execute commands."
+  },
+  "T1204": {
+    "name": "User Execution",
+    "tactic": "Execution",
+    "description": "Adversaries may rely upon a user to execute malicious code."
+  },
+  "T1568": {
+    "name": "Dynamic Resolution",
+    "tactic": "Command and Control",
+    "description": "Adversaries may dynamically resolve domains to evade detection."
+  }
+}

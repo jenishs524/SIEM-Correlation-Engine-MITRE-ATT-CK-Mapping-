@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>SIEM Dashboard – MITRE ATT&CK Alerts</title>
+    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: #0b0e14;
+            color: #e0e0e0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #f9e2af;
+            border-bottom: 2px solid #4a90e2;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-weight: 300;
+        }
+        .alert {
+            background: #1e2430;
+            margin: 8px 0;
+            padding: 12px 16px;
+            border-radius: 6px;
+            border-left: 5px solid #f38ba8;
+            transition: background 0.2s;
+        }
+        .alert:hover { background: #2a3142; }
+        .severity-CRITICAL { border-left-color: #ff0000; }
+        .severity-HIGH     { border-left-color: #ff6b6b; }
+        .severity-MEDIUM   { border-left-color: #ffd93d; }
+        .severity-LOW      { border-left-color: #6bcb6b; }
+        .timestamp {
+            color: #89b4fa;
+            font-weight: bold;
+            margin-right: 12px;
+        }
+        .rule-name {
+            font-weight: 600;
+            color: #f9e2af;
+        }
+        .mitre {
+            background: #2a3142;
+            padding: 2px 12px;
+            border-radius: 20px;
+            display: inline-block;
+            margin: 0 8px;
+            font-size: 0.9em;
+        }
+        .mitre-id {
+            color: #f9e2af;
+            font-weight: bold;
+        }
+        .severity-badge {
+            float: right;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .severity-CRITICAL .severity-badge { color: #ff0000; }
+        .severity-HIGH .severity-badge     { color: #ff6b6b; }
+        .severity-MEDIUM .severity-badge   { color: #ffd93d; }
+        .severity-LOW .severity-badge      { color: #6bcb6b; }
+        .details {
+            margin-top: 6px;
+            color: #b0b0b0;
+            font-size: 0.92em;
+        }
+        .trigger-data {
+            font-size: 0.8em;
+            color: #888;
+            margin-top: 4px;
+            border-top: 1px solid #2a3142;
+            padding-top: 4px;
+            word-break: break-all;
+        }
+        .empty {
+            text-align: center;
+            color: #666;
+            padding: 40px 0;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚨 SIEM – MITRE ATT&CK Alerts</h1>
+        <div id="alerts">
+            <div class="empty">Waiting for alerts…</div>
+        </div>
+    </div>
+
+    <script>
+        const socket = io('http://127.0.0.1:5002');
+        const alertsDiv = document.getElementById('alerts');
+
+        socket.on('connect', () => {
+            console.log('✅ Connected to SIEM dashboard');
+            if (alertsDiv.children.length === 1 && alertsDiv.children[0].classList.contains('empty')) {
+                alertsDiv.innerHTML = '';
+            }
+        });
+
+        socket.on('siem_alert', (data) => {
+            if (alertsDiv.children.length === 1 && alertsDiv.children[0].classList.contains('empty')) {
+                alertsDiv.innerHTML = '';
+            }
+            const el = document.createElement('div');
+            el.className = `alert severity-${data.severity || 'MEDIUM'}`;
+            const mitreHtml = data.mitre_id && data.mitre_name
+                ? `<span class="mitre"><span class="mitre-id">${data.mitre_id}</span> ${data.mitre_name}</span>`
+                : '';
+            const triggerStr = data.trigger_event ? JSON.stringify(data.trigger_event, null, 0) : '';
+            el.innerHTML = `
+                <div>
+                    <span class="timestamp">${data.timestamp}</span>
+                    <span class="rule-name">${data.rule_name}</span>
+                    ${mitreHtml}
+                    <span class="severity-badge">${data.severity || 'MEDIUM'}</span>
+                </div>
+                <div class="details">
+                    ${data.description || ''}
+                    ${data.mitre_tactic ? `<br>🎯 Tactic: ${data.mitre_tactic}` : ''}
+                </div>
+                ${triggerStr ? `<div class="trigger-data">📋 Trigger: ${triggerStr}</div>` : ''}
+            `;
+            alertsDiv.prepend(el);
+            while (alertsDiv.children.length > 50) {
+                alertsDiv.removeChild(alertsDiv.lastChild);
+            }
+        });
+
+        socket.on('disconnect', () => {
+            console.warn('⚠️ Disconnected from SIEM dashboard');
+        });
+    </script>
+</body>
+</html>
